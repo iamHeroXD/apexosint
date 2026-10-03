@@ -59,6 +59,10 @@ export const api = {
     request<{ status: string; investigation_id: string }>(`/investigations/${id}/run${wait ? "?wait=true" : ""}`, { method: "POST" }),
   stopInvestigation: (id: string) =>
     request<{ status: string; investigation_id: string }>(`/investigations/${id}/stop`, { method: "POST" }),
+  purgeInvestigations: () =>
+    request<{ status: string; message: string }>("/investigations/purge", { method: "DELETE" }),
+  deleteInvestigation: (id: string) =>
+    request<{ status: string; id: string }>(`/investigations/${id}`, { method: "DELETE" }),
 
   // Graph & Data
   getEntities: (id: string, type?: string) =>

@@ -119,6 +119,27 @@ async def stop_investigation(investigation_id: str, db: AsyncSession = Depends(g
     return {"status": "stopped" if stopped else "not_running", "investigation_id": investigation_id}
 
 
+@router.delete("/purge")
+async def purge_all_investigations(db: AsyncSession = Depends(get_db)):
+    """Wipe all investigations and historical telemetry for complete zero-trace anonymous operation."""
+    from sqlalchemy import delete
+    from app.models.investigation import Investigation
+    await db.execute(delete(Investigation))
+    await db.commit()
+    return {"status": "purged", "message": "All investigation history and footprints completely wiped."}
+
+
+@router.delete("/{investigation_id}")
+async def delete_investigation(investigation_id: str, db: AsyncSession = Depends(get_db)):
+    """Delete a single investigation and all its associated data."""
+    inv = await db.get(Investigation, investigation_id)
+    if not inv:
+        raise HTTPException(status_code=404, detail="Investigation not found")
+    await db.delete(inv)
+    await db.commit()
+    return {"status": "deleted", "id": investigation_id}
+
+
 @router.get("/{investigation_id}/entities", response_model=List[EntityOut])
 async def list_entities(
     investigation_id: str,

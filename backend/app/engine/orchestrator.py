@@ -99,12 +99,12 @@ class InvestigationOrchestrator:
 
                 budget = inv.budget_json or {
                     "max_depth": 2,
-                    "max_requests": 150,
+                    "max_requests": 500,
                     "max_modules": 30,
-                    "max_runtime": 180,
+                    "max_runtime": 300,
                 }
                 max_depth = min(inv.depth, budget.get("max_depth", 2))
-                max_runtime = budget.get("max_runtime", 180)
+                max_runtime = budget.get("max_runtime", 300)
 
                 # Process initial targets through depths
                 current_depth = 0
@@ -156,7 +156,7 @@ class InvestigationOrchestrator:
                                         tgt.detected_type,
                                         {"investigation_id": investigation_id}
                                     ),
-                                    timeout=20.0
+                                    timeout=60.0
                                 )
                                 dur = (time.monotonic() - m_start) * 1000.0
                                 return mod_obj, f, dur, None

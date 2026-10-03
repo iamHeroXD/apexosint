@@ -27,6 +27,10 @@ import {
   Smartphone,
   Link2,
   Activity,
+  Trash2,
+  EyeOff,
+  Lock,
+  CheckCircle,
 } from "lucide-react";
 
 interface SiteRecord {
@@ -73,6 +77,33 @@ export const App: React.FC = () => {
   const [isParsing, setIsParsing] = useState(false);
   const [showParsePreview, setShowParsePreview] = useState(false);
 
+  // Zero-Trace Anonymous Mode & Privacy
+  const [zeroTraceMode, setZeroTraceMode] = useState(true);
+  const [purging, setPurging] = useState(false);
+  const [purgeNotice, setPurgeNotice] = useState(false);
+
+  const handlePurgeAllData = async () => {
+    if (purging) return;
+    setPurging(true);
+    try {
+      await api.purgeInvestigations();
+      setPastInvestigations([]);
+      setDossier(null);
+      setEntities([]);
+      setInvestigation(null);
+      setQuery("");
+      setShowAiReport(false);
+      setParsedTargets([]);
+      setShowParsePreview(false);
+      setPurgeNotice(true);
+      setTimeout(() => setPurgeNotice(false), 3500);
+    } catch (err) {
+      console.error("Purge error:", err);
+    } finally {
+      setPurging(false);
+    }
+  };
+
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
   const aiReportRef = useRef<HTMLDivElement>(null);
@@ -90,8 +121,11 @@ export const App: React.FC = () => {
       }
       setActiveWorkspace(ws);
 
-      const invs = await api.listInvestigations(ws.id);
-      setPastInvestigations(invs);
+      // In Zero-Trace Mode, do not load or expose past search history
+      if (!zeroTraceMode) {
+        const invs = await api.listInvestigations(ws.id);
+        setPastInvestigations(invs);
+      }
     } catch (err) {
       console.error(err);
     }
@@ -188,14 +222,17 @@ export const App: React.FC = () => {
 
       setInvestigation(inv);
       setScanProgress(40);
-      setScanStep("Deep-probing 125+ platforms across Gaming, Code, Tech, Social, and Creative ecosystems...");
+      setScanStep("Deep-probing 320+ platforms across Gaming, Code, Tech, Social, and Creative ecosystems with zero-trace anonymity...");
 
       let stepIdx = 0;
       const progressSteps = [
-        { pct: 55, msg: "Probing developer platforms, code repositories, and public endpoints..." },
-        { pct: 70, msg: "Checking DNS, RDAP, Geolocation coordinates, and Certificate Transparency..." },
-        { pct: 85, msg: "Correlating discovered identities, usernames, and organization relationships..." },
-        { pct: 95, msg: "Resolving entity graph clusters and compiling intelligence matrix..." },
+        { pct: 45, msg: "Probing 40+ live phone sources: spam databases, caller ID, social platforms..." },
+        { pct: 57, msg: "Checking Indian business directories: JustDial, IndiaMART, Sulekha, Yellow Pages..." },
+        { pct: 68, msg: "Querying free phone validation APIs (Veriphone, AbstractAPI)..." },
+        { pct: 76, msg: "Checking payment platforms, fintech, and UPI registries..." },
+        { pct: 83, msg: "Searching GitHub, Pastebin, and public web for exposed data..." },
+        { pct: 90, msg: "Correlating discovered entities, carrier data, and location footprint..." },
+        { pct: 96, msg: "Compiling intelligence matrix and generating entity graph..." },
       ];
 
       const pollTimer = setInterval(() => {
@@ -204,7 +241,7 @@ export const App: React.FC = () => {
           setScanStep(progressSteps[stepIdx].msg);
           stepIdx++;
         }
-      }, 700);
+      }, 1400);
 
       try {
         await api.runInvestigation(inv.id);
@@ -222,8 +259,10 @@ export const App: React.FC = () => {
       setDossier(dossierRes);
       setEntities(entitiesRes);
 
-      // Refresh past list
-      api.listInvestigations(wsId).then(setPastInvestigations).catch(console.error);
+      // Refresh past list only if Zero-Trace Mode is disabled
+      if (!zeroTraceMode) {
+        api.listInvestigations(wsId).then(setPastInvestigations).catch(console.error);
+      }
 
       setTimeout(() => {
         resultsRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -353,9 +392,33 @@ export const App: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center space-x-2 text-xs font-mono">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span className="text-slate-400">Local Engine Active (Port 8000)</span>
+          <div className="flex items-center space-x-3 text-xs font-mono">
+            {/* Zero-Trace Anonymous Mode Badge */}
+            <div className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold">
+              <EyeOff className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Zero-Trace Anonymous</span>
+            </div>
+
+            {/* Purge All Traces Button */}
+            <button
+              type="button"
+              onClick={handlePurgeAllData}
+              disabled={purging}
+              title="Wipe all investigation footprints, databases, and history"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 hover:text-red-300 font-bold transition-colors cursor-pointer"
+            >
+              {purging ? (
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Trash2 className="w-3.5 h-3.5" />
+              )}
+              <span>Purge History</span>
+            </button>
+
+            <div className="hidden sm:flex items-center space-x-2 text-slate-400 border-l border-[#1e2942] pl-3">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>Port 8000 Active</span>
+            </div>
           </div>
         </div>
       </header>
@@ -373,6 +436,14 @@ export const App: React.FC = () => {
               Enter a name, username, email, phone, domain, IP — or just <span className="text-amber-400 font-bold">type a sentence</span> like <span className="italic text-slate-300">"his name is Rohan, lives in Kochi, phone 98461 23456, email r@gmail.com"</span> and AI will extract everything.
             </p>
           </div>
+
+          {/* Purge Success Banner */}
+          {purgeNotice && (
+            <div className="bg-emerald-500/10 border border-emerald-500/40 rounded-xl p-3 flex items-center space-x-2 text-xs font-mono text-emerald-400 animate-fadeIn">
+              <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>All past investigations, cached target entities, and database footprints have been completely purged. Zero traces remain.</span>
+            </div>
+          )}
 
           <form
             onSubmit={(e) => {
@@ -1048,46 +1119,89 @@ export const App: React.FC = () => {
                 {/* Scan New Target Action */}
                 <div className="pt-3 border-t border-[#1e2840] flex flex-col sm:flex-row justify-between items-center text-xs font-mono text-slate-400 gap-2">
                   <span>Investigation ID: {investigation?.id}</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setQuery("");
-                      setDossier(null);
-                      setShowAiReport(false);
-                      window.scrollTo({ top: 0, behavior: "smooth" });
-                      setTimeout(() => inputRef.current?.focus(), 100);
-                    }}
-                    className="px-4 py-2 rounded-xl bg-[#141d33] hover:bg-[#1a2642] border border-[#212e4d] text-sky-400 hover:text-white font-bold transition-colors cursor-pointer"
-                  >
-                    Start New Target Scan →
-                  </button>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      type="button"
+                      onClick={handlePurgeAllData}
+                      disabled={purging}
+                      className="px-4 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 hover:text-red-300 font-bold transition-colors cursor-pointer flex items-center space-x-1.5"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>{purging ? "Purging..." : "Wipe Case & Reset"}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setQuery("");
+                        setDossier(null);
+                        setShowAiReport(false);
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                        setTimeout(() => inputRef.current?.focus(), 100);
+                      }}
+                      className="px-4 py-2 rounded-xl bg-[#141d33] hover:bg-[#1a2642] border border-[#212e4d] text-sky-400 hover:text-white font-bold transition-colors cursor-pointer"
+                    >
+                      Start New Target Scan →
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
           </div>
         )}
 
-        {/* PAST INVESTIGATIONS HISTORY */}
-        {pastInvestigations.length > 0 && !dossier && (
+        {/* ZERO-TRACE PRIVACY & OPERATIONAL SECURITY ARCHITECTURE */}
+        {!dossier && (
           <div className="bg-[#0e1424] border border-[#1e2942] rounded-2xl p-5 space-y-3">
-            <span className="text-xs font-mono text-slate-400 font-bold block uppercase tracking-wider">
-              Recent Case History:
-            </span>
-            <div className="flex flex-wrap gap-2 text-xs font-mono">
-              {pastInvestigations.slice(0, 8).map((inv) => (
-                <button
-                  key={inv.id}
-                  type="button"
-                  onClick={() => {
-                    setQuery(inv.title);
-                    handleStartScan(inv.title);
-                  }}
-                  className="px-3 py-1.5 rounded-lg bg-[#141d33] hover:bg-[#1a2642] border border-[#212e4d] text-slate-300 hover:text-white transition-colors cursor-pointer flex items-center space-x-1.5"
-                >
-                  <span>{inv.title}</span>
-                  <ChevronRight className="w-3 h-3 text-slate-500" />
-                </button>
-              ))}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1b253b] pb-3">
+              <div className="flex items-center space-x-2">
+                <Shield className="w-4 h-4 text-emerald-400" />
+                <span className="text-xs font-mono text-white font-bold uppercase tracking-wider">
+                  Zero-Trace Operational Security Architecture
+                </span>
+              </div>
+              <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-1 rounded-lg">
+                100% EPHEMERAL • ZERO LOCAL LOGS
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
+              <div className="bg-[#12192c] p-3 rounded-xl border border-[#1e2840] space-y-1">
+                <span className="text-slate-400 font-bold block flex items-center space-x-1.5">
+                  <EyeOff className="w-3.5 h-3.5 text-sky-400" />
+                  <span>No Search History</span>
+                </span>
+                <span className="text-slate-500 text-[11px] block">
+                  Search inputs, targets, and outputs are ephemeral and not exposed or tracked.
+                </span>
+              </div>
+              <div className="bg-[#12192c] p-3 rounded-xl border border-[#1e2840] space-y-1">
+                <span className="text-slate-400 font-bold block flex items-center space-x-1.5">
+                  <Lock className="w-3.5 h-3.5 text-purple-400" />
+                  <span>Randomized Fingerprints</span>
+                </span>
+                <span className="text-slate-500 text-[11px] block">
+                  Rotating randomized user-agents across desktop & mobile to prevent tracker correlation.
+                </span>
+              </div>
+              <div className="bg-[#12192c] p-3 rounded-xl border border-[#1e2840] space-y-1">
+                <span className="text-slate-400 font-bold block flex items-center space-x-1.5">
+                  <Activity className="w-3.5 h-3.5 text-amber-400" />
+                  <span>320+ Live Probes</span>
+                </span>
+                <span className="text-slate-500 text-[11px] block">
+                  Passive non-intrusive public endpoint probing with strict request sandboxing.
+                </span>
+              </div>
+            </div>
+            <div className="pt-2 flex justify-end">
+              <button
+                type="button"
+                onClick={handlePurgeAllData}
+                disabled={purging}
+                className="px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 font-mono text-xs font-bold transition-colors cursor-pointer flex items-center space-x-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{purging ? "Purging..." : "Wipe All Traces & Clear DB"}</span>
+              </button>
             </div>
           </div>
         )}

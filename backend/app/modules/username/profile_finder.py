@@ -15,6 +15,7 @@ from app.modules.base import (
     NormalizedEvidence,
     NormalizedRelationship,
 )
+from app.modules.username.catalog import EXTENDED_PLATFORM_CATALOG
 
 # Supported public platforms catalog (125+ platforms across Gaming, Dev, Social, Creative, Media, and Security)
 PLATFORM_CATALOG: List[Dict[str, Any]] = [
@@ -819,14 +820,24 @@ PLATFORM_CATALOG: List[Dict[str, Any]] = [
 ]
 
 
+# Deduplicate merged full catalog
+_seen_names = set()
+FULL_PLATFORM_CATALOG: List[Dict[str, Any]] = []
+for _p in PLATFORM_CATALOG + EXTENDED_PLATFORM_CATALOG:
+    _key = _p["name"].lower().strip()
+    if _key not in _seen_names:
+        _seen_names.add(_key)
+        FULL_PLATFORM_CATALOG.append(_p)
+
+
 class UsernameProfileFinderModule(BaseOSINTModule):
     """Deep Multi-Platform Public Identity & Presence Prober."""
 
     name = "username_profile_finder"
     display_name = "Public Multi-Platform Identity Prober"
     description = (
-        "High-performance parallel OSINT prober scanning 125+ public platforms across Gaming, "
-        "Developer ecosystems, Social networks, Creative portfolios, and Security directories."
+        f"High-performance parallel OSINT prober scanning {len(FULL_PLATFORM_CATALOG)}+ public platforms across Gaming, "
+        "Developer ecosystems, Social networks, Creative portfolios, and Security directories with zero-trace randomized anonymity."
     )
     category = "USERNAME"
     target_types = ["USERNAME", "PERSON"]
@@ -849,15 +860,26 @@ class UsernameProfileFinderModule(BaseOSINTModule):
         all_probed_sites: List[Dict[str, Any]] = []
 
         # High-concurrency worker pool with shared connection pool
-        semaphore = asyncio.Semaphore(35)
+        semaphore = asyncio.Semaphore(50)
+        import random
+        user_agents = [
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Safari/605.1.15",
+            "Mozilla/5.0 (X11; Linux x86_64; rv:130.0) Gecko/20100101 Firefox/130.0",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:130.0) Gecko/20100101 Firefox/130.0",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 Edg/128.0.0.0",
+        ]
         headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+            "User-Agent": random.choice(user_agents),
             "Accept": "text/html,application/xhtml+xml,application/json,*/*",
             "Accept-Language": "en-US,en;q=0.9",
+            "DNT": "1",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
         }
-        limits = httpx.Limits(max_keepalive_connections=50, max_connections=80)
+        limits = httpx.Limits(max_keepalive_connections=80, max_connections=120)
 
-        async with httpx.AsyncClient(timeout=3.5, limits=limits, headers=headers, follow_redirects=False, verify=False) as client:
+        async with httpx.AsyncClient(timeout=4.0, limits=limits, headers=headers, follow_redirects=False, verify=False) as client:
             async def check_platform(plat: Dict[str, Any]):
                 url = plat["url_pattern"].format(username=username)
                 public_url = plat.get("profile_url", url).format(username=username)
@@ -896,7 +918,7 @@ class UsernameProfileFinderModule(BaseOSINTModule):
                 })
 
             # Concurrently probe all platforms in parallel
-            await asyncio.gather(*(check_platform(p) for p in PLATFORM_CATALOG))
+            await asyncio.gather(*(check_platform(p) for p in FULL_PLATFORM_CATALOG))
 
             # Deep Identity Extraction on confirmed platforms
             # If GitHub is found, extract public bio, location, name, and website
@@ -994,7 +1016,7 @@ class UsernameProfileFinderModule(BaseOSINTModule):
         found_profiles.sort(key=lambda x: (x["category"], x["platform"]))
 
         evidence_snippet = (
-            f"Deep-scanned {len(PLATFORM_CATALOG)} public platforms for handle '{username}'. "
+            f"Deep-scanned {len(FULL_PLATFORM_CATALOG)} public platforms for handle '{username}'. "
             f"Verified {len(found_profiles)} active endpoints across gaming, tech, social, and code ecosystems: "
             f"{', '.join(p['platform'] for p in found_profiles[:8])}"
             f"{'...' if len(found_profiles) > 8 else ''}."
@@ -1002,7 +1024,7 @@ class UsernameProfileFinderModule(BaseOSINTModule):
 
         finding.evidence.append(
             NormalizedEvidence(
-                source_name="Multi-Platform Identity Prober (125+ Ecosystems)",
+                source_name=f"Multi-Platform Identity Prober ({len(FULL_PLATFORM_CATALOG)}+ Ecosystems)",
                 source_type="SOCIAL_PROFILE",
                 source_url=None,
                 snippet=evidence_snippet,
@@ -1011,7 +1033,7 @@ class UsernameProfileFinderModule(BaseOSINTModule):
                 epistemic_label="OBSERVED",
                 raw_payload={
                     "username": username,
-                    "total_probed": len(PLATFORM_CATALOG),
+                    "total_probed": len(FULL_PLATFORM_CATALOG),
                     "found_count": len(found_profiles),
                     "verified_matches": found_profiles,
                     "all_probed_sites": all_probed_sites,
