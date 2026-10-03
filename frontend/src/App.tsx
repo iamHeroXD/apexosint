@@ -22,6 +22,11 @@ import {
   Layers,
   ChevronRight,
   AlertTriangle,
+  Image as ImageIcon,
+  Radio,
+  Smartphone,
+  Link2,
+  Activity,
 } from "lucide-react";
 
 interface SiteRecord {
@@ -62,6 +67,7 @@ export const App: React.FC = () => {
   const [copied, setCopied] = useState(false);
   const [siteFilter, setSiteFilter] = useState<"found" | "all" | "dormant">("found");
   const [siteSearch, setSiteSearch] = useState("");
+  const [mapExpanded, setMapExpanded] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
@@ -157,7 +163,6 @@ export const App: React.FC = () => {
       setScanProgress(40);
       setScanStep("Deep-probing 125+ platforms across Gaming, Code, Tech, Social, and Creative ecosystems...");
 
-      // Launch investigation with wait=true
       let stepIdx = 0;
       const progressSteps = [
         { pct: 55, msg: "Probing developer platforms, code repositories, and public endpoints..." },
@@ -175,15 +180,11 @@ export const App: React.FC = () => {
       }, 700);
 
       try {
-        await api.runInvestigation(inv.id, true);
+        await api.runInvestigation(inv.id);
       } finally {
         clearInterval(pollTimer);
       }
 
-      setScanProgress(98);
-      setScanStep("Loading synthesized intelligence dossier and discovered entities...");
-
-      // Fetch resulting dossier and entities
       const [dossierRes, entitiesRes] = await Promise.all([
         api.getDossier(inv.id),
         api.getEntities(inv.id),
@@ -285,6 +286,26 @@ export const App: React.FC = () => {
   const emails = entities.filter((e) => e.type === "EMAIL");
   const domains = entities.filter((e) => e.type === "DOMAIN" || e.type === "SUBDOMAIN");
   const phoneEntities = entities.filter((e) => e.type === "PHONE");
+  const avatarEntities = entities.filter((e) => e.type === "AVATAR_IMAGE");
+  const orgEntities = entities.filter((e) => e.type === "ORGANIZATION");
+
+  // Build OSM iframe URL from location coordinates
+  const lat = locationEntity?.metadata_json?.latitude;
+  const lon = locationEntity?.metadata_json?.longitude;
+  const osmEmbedUrl = lat && lon
+    ? `https://www.openstreetmap.org/export/embed.html?bbox=${(lon - 0.09).toFixed(4)}%2C${(lat - 0.06).toFixed(4)}%2C${(lon + 0.09).toFixed(4)}%2C${(lat + 0.06).toFixed(4)}&layer=mapnik&marker=${lat.toFixed(5)}%2C${lon.toFixed(5)}`
+    : null;
+  const osmFullUrl = lat && lon
+    ? `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=13/${lat}/${lon}`
+    : null;
+  const satelliteUrl = lat && lon
+    ? `https://www.google.com/maps?q=${lat},${lon}&t=k&z=14`
+    : null;
+
+  // Phone digits for quick-links
+  const phoneDigits = phoneEntities.length > 0
+    ? phoneEntities[0].value.replace(/[^\d]/g, "")
+    : null;
 
   return (
     <div className="min-h-screen w-full bg-[#080c14] text-slate-100 flex flex-col font-sans select-text">
@@ -313,24 +334,19 @@ export const App: React.FC = () => {
       </header>
 
       {/* Main Container */}
-      <main className="flex-1 max-w-5xl mx-auto w-full px-6 py-10 space-y-8">
-        {/* Hero Headline */}
-        <div className="text-center space-y-2 max-w-2xl mx-auto">
-          <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/25 text-blue-400 text-xs font-mono font-semibold">
-            <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-            <span>Multi-Source OSINT Investigation Platform</span>
-          </span>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-            Investigate Any Public Target
-          </h1>
-          <p className="text-sm text-slate-400">
-            One input for email, phone, username, full name, IP, domain, or repository.
-            Passively searches 40+ platforms, resolves geographic locations, and summarizes with AI.
-          </p>
-        </div>
+      <main className="max-w-5xl mx-auto w-full px-4 py-8 space-y-6 flex-1">
 
-        {/* ONE MASSIVE UNIVERSAL SEARCH INPUT */}
-        <div className="bg-[#0e1424] border border-[#1e2942] rounded-2xl p-6 shadow-2xl space-y-4">
+        {/* SEARCH INPUT PANEL */}
+        <div className="bg-[#0e1424] border border-[#1e2942] rounded-2xl p-6 shadow-xl space-y-4">
+          <div>
+            <h1 className="text-2xl font-extrabold font-mono text-white tracking-tight">
+              Universal Target Investigation
+            </h1>
+            <p className="text-slate-400 text-xs font-mono mt-1">
+              Enter any identifier — name, username, email, phone, domain, IP, URL, or company.
+            </p>
+          </div>
+
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -338,39 +354,27 @@ export const App: React.FC = () => {
             }}
             className="space-y-3"
           >
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex items-center space-x-3">
               <div className="relative flex-1">
-                <Search className="w-5 h-5 text-slate-400 absolute left-4 top-3.5" />
+                <Search className="w-4 h-4 text-slate-500 absolute left-4 top-3.5" />
                 <input
                   ref={inputRef}
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Enter email, phone number, username, name, IP, or domain..."
-                  className="w-full bg-[#131b2e] border border-[#233150] focus:border-blue-500 focus:bg-[#162038] text-white text-base rounded-xl pl-12 pr-10 py-3 font-mono focus:outline-none placeholder-slate-500 transition-colors"
-                  disabled={isScanning}
+                  placeholder="Enter anything to investigate..."
+                  autoComplete="off"
+                  spellCheck={false}
+                  className="w-full bg-[#0b101c] border border-[#212e4d] focus:border-blue-500 rounded-xl pl-11 pr-4 py-3 text-sm text-white placeholder-slate-500 font-mono outline-none transition-colors"
                 />
-                {query && (
-                  <button
-                    type="button"
-                    onClick={() => setQuery("")}
-                    className="absolute right-3 top-3.5 text-slate-400 hover:text-white p-1"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
               </div>
-
               <button
                 type="submit"
                 disabled={isScanning || !query.trim()}
-                className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm font-mono flex items-center justify-center space-x-2 transition-all shadow-lg hover:shadow-blue-500/25 disabled:opacity-50 disabled:pointer-events-none cursor-pointer shrink-0"
+                className="px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:bg-blue-900 disabled:cursor-not-allowed text-white font-bold text-sm font-mono flex items-center space-x-2 transition-colors shrink-0 cursor-pointer"
               >
                 {isScanning ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    <span>Investigating...</span>
-                  </>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
                 ) : (
                   <>
                     <span>Investigate</span>
@@ -469,7 +473,59 @@ export const App: React.FC = () => {
               </div>
             </div>
 
-            {/* CARD 1: LOCATION & GEOGRAPHIC FOOTPRINT */}
+            {/* ─── CARD 0: VISUAL IDENTITY / AVATAR (if any avatars found) ─── */}
+            {avatarEntities.length > 0 && (
+              <div className="bg-[#0e1424] border border-[#1e2942] rounded-2xl p-6 shadow-md space-y-4">
+                <div className="flex items-center space-x-2.5 border-b border-[#1b253b] pb-3">
+                  <ImageIcon className="w-5 h-5 text-pink-400" />
+                  <h3 className="text-sm font-bold font-mono text-white uppercase tracking-wider">
+                    Visual Identity & Profile Imagery
+                  </h3>
+                </div>
+                <div className="flex flex-wrap gap-4">
+                  {avatarEntities.map((ae, idx) => {
+                    const platform = ae.metadata_json?.platform || "Public Profile";
+                    const imgUrl = ae.value;
+                    const profileUrl = ae.metadata_json?.profile_url;
+                    return (
+                      <div key={idx} className="flex flex-col items-center space-y-2">
+                        <a
+                          href={profileUrl || imgUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block"
+                        >
+                          <img
+                            src={imgUrl}
+                            alt={`Avatar from ${platform}`}
+                            className="w-20 h-20 rounded-xl border-2 border-[#1e2942] object-cover hover:border-blue-500 transition-colors"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = "none";
+                            }}
+                          />
+                        </a>
+                        <span className="text-[10px] font-mono text-slate-400 uppercase font-bold tracking-wider">
+                          {platform}
+                        </span>
+                        {profileUrl && (
+                          <a
+                            href={profileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[10px] font-mono text-blue-400 hover:text-blue-300 flex items-center space-x-1"
+                          >
+                            <span>Profile</span>
+                            <ExternalLink className="w-2.5 h-2.5" />
+                          </a>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* ─── CARD 1: LOCATION & GEOGRAPHIC FOOTPRINT ─── */}
             <div className="bg-[#0e1424] border border-[#1e2942] rounded-2xl p-6 shadow-md space-y-4">
               <div className="flex items-center space-x-2.5 border-b border-[#1b253b] pb-3">
                 <MapPin className="w-5 h-5 text-emerald-400" />
@@ -479,7 +535,8 @@ export const App: React.FC = () => {
               </div>
 
               {locationEntity ? (
-                <div className="space-y-3 text-xs font-mono">
+                <div className="space-y-4 text-xs font-mono">
+                  {/* Location summary badges */}
                   <div className="flex flex-wrap items-baseline gap-2">
                     <span className="text-slate-400">Detected Location:</span>
                     <span className="px-3 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-bold text-sm">
@@ -488,38 +545,163 @@ export const App: React.FC = () => {
                   </div>
 
                   {locationEntity.metadata_json && (
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-[#12192c] p-3 rounded-xl border border-[#1e2840]">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-[#12192c] p-3 rounded-xl border border-[#1e2840]">
                       <div>
-                        <span className="text-slate-500 block text-[10px]">COUNTRY:</span>
+                        <span className="text-slate-500 block text-[10px] uppercase">Country</span>
                         <span className="text-slate-200 font-semibold">{locationEntity.metadata_json.country || "N/A"}</span>
                       </div>
                       <div>
-                        <span className="text-slate-500 block text-[10px]">CITY / REGION:</span>
-                        <span className="text-slate-200 font-semibold">{locationEntity.metadata_json.city || "N/A"}</span>
+                        <span className="text-slate-500 block text-[10px] uppercase">District / City</span>
+                        <span className="text-slate-200 font-semibold">{locationEntity.metadata_json.city || locationEntity.metadata_json.district_ssa || "N/A"}</span>
                       </div>
                       <div>
-                        <span className="text-slate-500 block text-[10px]">COORDINATES:</span>
-                        <span className="text-slate-200 font-semibold">
-                          {locationEntity.metadata_json.latitude && locationEntity.metadata_json.longitude
-                            ? `${locationEntity.metadata_json.latitude}, ${locationEntity.metadata_json.longitude}`
-                            : "Approximate BGP"}
+                        <span className="text-slate-500 block text-[10px] uppercase">State / Circle</span>
+                        <span className="text-slate-200 font-semibold">{locationEntity.metadata_json.state_circle || "N/A"}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-500 block text-[10px] uppercase">Carrier / Operator</span>
+                        <span className="text-blue-300 font-semibold">{locationEntity.metadata_json.operator || "N/A"}</span>
+                      </div>
+                      {lat && lon && (
+                        <div className="col-span-2">
+                          <span className="text-slate-500 block text-[10px] uppercase">Coordinates (SSA Registry)</span>
+                          <span className="text-amber-300 font-semibold font-mono">{lat.toFixed(4)}, {lon.toFixed(4)}</span>
+                        </div>
+                      )}
+                      {locationEntity.metadata_json.timezone && (
+                        <div>
+                          <span className="text-slate-500 block text-[10px] uppercase">Timezone</span>
+                          <span className="text-slate-200 font-semibold">{locationEntity.metadata_json.timezone}</span>
+                        </div>
+                      )}
+                      {locationEntity.metadata_json.routing && (
+                        <div className="col-span-2 sm:col-span-4">
+                          <span className="text-slate-500 block text-[10px] uppercase">Routing / Numbering Authority</span>
+                          <span className="text-slate-300">{locationEntity.metadata_json.routing}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Interactive OpenStreetMap Embed */}
+                  {osmEmbedUrl && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <Radio className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+                          <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-wider">
+                            Live Radar — SSA Registry Location
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setMapExpanded((v) => !v)}
+                          className="text-[10px] font-mono text-slate-400 hover:text-white px-2 py-1 rounded border border-[#1e2840] hover:border-[#2e3f60] transition-colors"
+                        >
+                          {mapExpanded ? "Collapse ▲" : "Expand ▼"}
+                        </button>
+                      </div>
+                      <div
+                        className={`w-full rounded-xl overflow-hidden border border-[#1e2840] transition-all duration-300 ${mapExpanded ? "h-96" : "h-52"}`}
+                      >
+                        <iframe
+                          src={osmEmbedUrl}
+                          width="100%"
+                          height="100%"
+                          style={{ border: 0 }}
+                          title="APEX Location Map"
+                          loading="lazy"
+                          allowFullScreen
+                        />
+                      </div>
+                      <div className="flex flex-wrap gap-2 text-[11px] font-mono">
+                        <a
+                          href={osmFullUrl!}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-emerald-600/15 hover:bg-emerald-600/25 border border-emerald-500/40 text-emerald-400 font-bold transition-colors"
+                        >
+                          <MapPin className="w-3 h-3" />
+                          <span>Full OpenStreetMap</span>
+                          <ExternalLink className="w-2.5 h-2.5" />
+                        </a>
+                        <a
+                          href={satelliteUrl!}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-amber-600/15 hover:bg-amber-600/25 border border-amber-500/40 text-amber-400 font-bold transition-colors"
+                        >
+                          <Globe className="w-3 h-3" />
+                          <span>Satellite View</span>
+                          <ExternalLink className="w-2.5 h-2.5" />
+                        </a>
+                        <span className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#12192c] border border-[#1e2840] text-slate-400">
+                          <Activity className="w-3 h-3" />
+                          <span>Passive SSA Registry • No Real-Time GPS</span>
                         </span>
                       </div>
                     </div>
                   )}
 
-                  {/* OpenStreetMap Direct Map Button */}
-                  {locationEntity.metadata_json?.latitude && locationEntity.metadata_json?.longitude && (
-                    <a
-                      href={`https://www.openstreetmap.org/?mlat=${locationEntity.metadata_json.latitude}&mlon=${locationEntity.metadata_json.longitude}#map=12/${locationEntity.metadata_json.latitude}/${locationEntity.metadata_json.longitude}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-emerald-600/15 hover:bg-emerald-600/25 border border-emerald-500/40 text-emerald-400 font-bold text-xs transition-colors"
-                    >
-                      <MapPin className="w-3.5 h-3.5" />
-                      <span>Open Interactive Location on OpenStreetMap</span>
-                      <ExternalLink className="w-3 h-3 ml-1" />
-                    </a>
+                  {/* Phone Quick-Links */}
+                  {phoneDigits && (
+                    <div className="space-y-2">
+                      <span className="text-[10px] font-mono font-bold text-sky-400 uppercase tracking-wider">
+                        ⚡ Quick Verification Links
+                      </span>
+                      <div className="flex flex-wrap gap-2 text-[11px] font-mono">
+                        <a
+                          href={`https://wa.me/${phoneDigits}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-green-600/15 hover:bg-green-600/25 border border-green-500/40 text-green-400 font-bold transition-colors"
+                        >
+                          <Smartphone className="w-3 h-3" />
+                          <span>WhatsApp</span>
+                          <ExternalLink className="w-2.5 h-2.5" />
+                        </a>
+                        <a
+                          href={`https://t.me/+${phoneDigits}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-sky-600/15 hover:bg-sky-600/25 border border-sky-500/40 text-sky-400 font-bold transition-colors"
+                        >
+                          <Radio className="w-3 h-3" />
+                          <span>Telegram</span>
+                          <ExternalLink className="w-2.5 h-2.5" />
+                        </a>
+                        <a
+                          href={`https://www.truecaller.com/search/in/${phoneDigits.slice(-10)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-blue-600/15 hover:bg-blue-600/25 border border-blue-500/40 text-blue-400 font-bold transition-colors"
+                        >
+                          <Phone className="w-3 h-3" />
+                          <span>Truecaller</span>
+                          <ExternalLink className="w-2.5 h-2.5" />
+                        </a>
+                        <a
+                          href={`https://www.google.com/search?q="${phoneEntities[0]?.value || phoneDigits}"`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-600/15 hover:bg-slate-600/25 border border-slate-500/40 text-slate-300 font-bold transition-colors"
+                        >
+                          <Search className="w-3 h-3" />
+                          <span>Google</span>
+                          <ExternalLink className="w-2.5 h-2.5" />
+                        </a>
+                        <a
+                          href={`https://www.getcontact.com/search?q=${phoneDigits.slice(-10)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-purple-600/15 hover:bg-purple-600/25 border border-purple-500/40 text-purple-400 font-bold transition-colors"
+                        >
+                          <Link2 className="w-3 h-3" />
+                          <span>GetContact</span>
+                          <ExternalLink className="w-2.5 h-2.5" />
+                        </a>
+                      </div>
+                    </div>
                   )}
                 </div>
               ) : (
@@ -532,7 +714,7 @@ export const App: React.FC = () => {
               )}
             </div>
 
-            {/* CARD 2: MATCHING WEBSITES FOUND (COUNT & PROFILE MATRIX) */}
+            {/* ─── CARD 2: MATCHING WEBSITES FOUND ─── */}
             <div className="bg-[#0e1424] border border-[#1e2942] rounded-2xl p-6 shadow-md space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#1b253b] pb-3 gap-2">
                 <div className="flex items-center space-x-2.5">
@@ -639,7 +821,7 @@ export const App: React.FC = () => {
               )}
             </div>
 
-            {/* CARD 3: EXTRACTED IDENTIFIERS & NETWORK */}
+            {/* ─── CARD 3: EXTRACTED IDENTIFIERS & NETWORK ─── */}
             <div className="bg-[#0e1424] border border-[#1e2942] rounded-2xl p-6 shadow-md space-y-4">
               <div className="flex items-center space-x-2.5 border-b border-[#1b253b] pb-3">
                 <Layers className="w-5 h-5 text-purple-400" />
@@ -678,6 +860,14 @@ export const App: React.FC = () => {
                     <span className="text-slate-400 font-bold block">TELEPHONY / PHONE ALLOCATION:</span>
                     <span className="text-slate-200">
                       {phoneEntities.map((p) => p.value).join(", ")}
+                    </span>
+                  </div>
+                )}
+                {orgEntities.length > 0 && (
+                  <div className="bg-[#12192c] p-3.5 rounded-xl border border-[#1e2840] space-y-1 sm:col-span-2">
+                    <span className="text-slate-400 font-bold block">ORGANIZATIONS / CARRIERS:</span>
+                    <span className="text-slate-200">
+                      {orgEntities.map((o) => o.value).join(" • ")}
                     </span>
                   </div>
                 )}

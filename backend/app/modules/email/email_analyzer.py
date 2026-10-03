@@ -117,6 +117,7 @@ class EmailAnalyzerModule(BaseOSINTModule):
             grav_resp = await client.get(gravatar_avatar_url)
             if grav_resp.status_code == 200:
                 has_gravatar = True
+                avatar_display_url = f"https://www.gravatar.com/avatar/{email_hash}?s=400"
                 all_email_sites.append({
                     "platform": "Gravatar Global Identity",
                     "category": "Global Avatar & Identity",
@@ -124,6 +125,20 @@ class EmailAnalyzerModule(BaseOSINTModule):
                     "status": "FOUND",
                     "status_code": 200,
                 })
+                # Add profile photo avatar entity
+                finding.discovered_entities.append(
+                    NormalizedEntity(
+                        type="AVATAR_IMAGE",
+                        value=avatar_display_url,
+                        normalized_value=avatar_display_url,
+                        confidence=0.98,
+                        metadata={
+                            "source": "Gravatar Profile Photo",
+                            "platform": "Gravatar",
+                            "caption": f"Gravatar Public Avatar ({email})"
+                        }
+                    )
+                )
                 # Attempt profile details lookup
                 try:
                     prof_resp = await client.get(gravatar_json_url)

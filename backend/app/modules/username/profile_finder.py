@@ -955,6 +955,38 @@ class UsernameProfileFinderModule(BaseOSINTModule):
                                     metadata={"source": "GitHub Profile"}
                                 )
                             )
+                        # Extract GitHub Profile Photo Avatar
+                        gh_avatar = gh_data.get("avatar_url") or f"https://github.com/{username}.png?size=400"
+                        finding.discovered_entities.append(
+                            NormalizedEntity(
+                                type="AVATAR_IMAGE",
+                                value=gh_avatar,
+                                normalized_value=gh_avatar,
+                                confidence=0.96,
+                                metadata={"source": "GitHub Profile Photo", "platform": "GitHub", "caption": f"GitHub Avatar for @{username}"}
+                            )
+                        )
+                except Exception:
+                    pass
+
+            # If Reddit is found, extract Reddit avatar
+            if any(p["platform"] == "Reddit" for p in found_profiles):
+                try:
+                    reddit_resp = await client.get(f"https://www.reddit.com/user/{username}/about.json")
+                    if reddit_resp.status_code == 200:
+                        reddit_data = reddit_resp.json().get("data", {})
+                        reddit_icon = reddit_data.get("icon_img") or reddit_data.get("snoovatar_img")
+                        if reddit_icon:
+                            clean_icon = reddit_icon.split("?")[0]
+                            finding.discovered_entities.append(
+                                NormalizedEntity(
+                                    type="AVATAR_IMAGE",
+                                    value=clean_icon,
+                                    normalized_value=clean_icon,
+                                    confidence=0.94,
+                                    metadata={"source": "Reddit User Avatar", "platform": "Reddit", "caption": f"Reddit Avatar for u/{username}"}
+                                )
+                            )
                 except Exception:
                     pass
 

@@ -66,78 +66,99 @@ COUNTRY_DIALING_DATA = {
 # TRAI (Telecom Regulatory Authority of India) & DoT Licensed Service Area (LSA) Numbering Plan
 # Maps 4-digit prefixes of Indian 10-digit mobile numbers to granular state circles and geo-coordinates
 INDIAN_TELECOM_CIRCLES: Dict[str, Tuple[str, str, float, float]] = {
-    # --- KERALA CIRCLE (Kochi / Thiruvananthapuram) ---
-    "9846": ("Kerala Circle", "Kochi / Thiruvananthapuram", 8.5241, 76.9366),
-    "9847": ("Kerala Circle", "Kochi / Thiruvananthapuram", 8.5241, 76.9366),
-    "9895": ("Kerala Circle", "Kochi / Kozhikode", 9.9312, 76.2673),
-    "9946": ("Kerala Circle", "Kochi / Thiruvananthapuram", 8.5241, 76.9366),
-    "9947": ("Kerala Circle", "Kochi / Thrissur", 10.5276, 76.2144),
-    "9961": ("Kerala Circle", "Kochi / Thiruvananthapuram", 8.5241, 76.9366),
-    "9995": ("Kerala Circle", "Kochi / Thiruvananthapuram", 8.5241, 76.9366),
-    "9744": ("Kerala Circle", "Kochi / Kottayam", 9.5916, 76.5222),
-    "9745": ("Kerala Circle", "Kochi / Kannur", 11.8745, 75.3704),
-    "9746": ("Kerala Circle", "Kochi / Thiruvananthapuram", 8.5241, 76.9366),
-    "9747": ("Kerala Circle", "Kochi / Kozhikode", 11.2588, 75.7804),
-    "9605": ("Kerala Circle", "Kochi / Thiruvananthapuram", 8.5241, 76.9366),
-    "9633": ("Kerala Circle", "Kochi / Thrissur", 10.5276, 76.2144),
-    "9645": ("Kerala Circle", "Kochi / Malappuram", 11.0732, 76.0740),
-    "9656": ("Kerala Circle", "Kochi / Palakkad", 10.7867, 76.6548),
-    "9526": ("Kerala Circle", "Kochi / Thiruvananthapuram", 8.5241, 76.9366),
-    "9539": ("Kerala Circle", "Kochi / Kozhikode", 11.2588, 75.7804),
-    "9544": ("Kerala Circle", "Kochi / Alappuzha", 9.4981, 76.3388),
-    "9562": ("Kerala Circle", "Kochi / Thiruvananthapuram", 8.5241, 76.9366),
-    "9567": ("Kerala Circle", "Kochi / Kollam", 8.8932, 76.6141),
-    "9400": ("Kerala Circle", "BSNL Kerala Circle", 8.5241, 76.9366),
-    "9446": ("Kerala Circle", "BSNL Kerala Circle", 9.9312, 76.2673),
-    "9447": ("Kerala Circle", "BSNL Kerala Circle", 8.5241, 76.9366),
-    "9495": ("Kerala Circle", "BSNL Kerala Circle", 11.2588, 75.7804),
-    "9496": ("Kerala Circle", "BSNL Kerala Circle", 8.5241, 76.9366),
-    "9497": ("Kerala Circle", "BSNL Kerala Circle", 9.9312, 76.2673),
-    "8075": ("Kerala Circle", "Kochi / Thiruvananthapuram", 8.5241, 76.9366),
-    "8078": ("Kerala Circle", "Kochi / Kozhikode", 11.2588, 75.7804),
-    "8086": ("Kerala Circle", "Kochi / Thiruvananthapuram", 8.5241, 76.9366),
-    "8089": ("Kerala Circle", "Kochi / Thiruvananthapuram", 8.5241, 76.9366),
-    "8111": ("Kerala Circle", "Kochi / Kozhikode", 11.2588, 75.7804),
-    "8113": ("Kerala Circle", "Kochi / Thrissur", 10.5276, 76.2144),
-    "8129": ("Kerala Circle", "Kochi / Thiruvananthapuram", 8.5241, 76.9366),
-    "8136": ("Kerala Circle", "Kochi / Kannur", 11.8745, 75.3704),
-    "8137": ("Kerala Circle", "Kochi / Malappuram", 11.0732, 76.0740),
-    "8138": ("Kerala Circle", "Kochi / Thiruvananthapuram", 8.5241, 76.9366),
-    "8139": ("Kerala Circle", "Kochi / Kottayam", 9.5916, 76.5222),
-    "8156": ("Kerala Circle", "Kochi / Kozhikode", 11.2588, 75.7804),
-    "8157": ("Kerala Circle", "Kochi / Palakkad", 10.7867, 76.6548),
-    "8281": ("Kerala Circle", "Kochi / Thiruvananthapuram", 8.5241, 76.9366),
-    "8289": ("Kerala Circle", "Kochi / Alappuzha", 9.4981, 76.3388),
-    "8547": ("Kerala Circle", "Kochi / Thiruvananthapuram", 8.5241, 76.9366),
-    "8589": ("Kerala Circle", "Kochi / Kozhikode", 11.2588, 75.7804),
-    "8590": ("Kerala Circle", "Kochi / Thiruvananthapuram", 8.5241, 76.9366),
-    "8592": ("Kerala Circle", "Kochi / Thrissur", 10.5276, 76.2144),
-    "8593": ("Kerala Circle", "Kochi / Kannur", 11.8745, 75.3704),
-    "8606": ("Kerala Circle", "Kochi / Thiruvananthapuram", 8.5241, 76.9366),
-    "8848": ("Kerala Circle", "Kochi / Thiruvananthapuram", 8.5241, 76.9366),
-    "8891": ("Kerala Circle", "Kochi / Kozhikode", 11.2588, 75.7804),
-    "8893": ("Kerala Circle", "Kochi / Thiruvananthapuram", 8.5241, 76.9366),
-    "8921": ("Kerala Circle", "Kochi / Thiruvananthapuram", 8.5241, 76.9366),
-    "8943": ("Kerala Circle", "Kochi / Malappuram", 11.0732, 76.0740),
-    "7012": ("Kerala Circle", "Kochi / Thiruvananthapuram", 8.5241, 76.9366),
-    "7025": ("Kerala Circle", "Kochi / Kozhikode", 11.2588, 75.7804),
-    "7034": ("Kerala Circle", "Kochi / Thrissur", 10.5276, 76.2144),
-    "7306": ("Kerala Circle", "Kochi / Thiruvananthapuram", 8.5241, 76.9366),
-    "7356": ("Kerala Circle", "Kochi / Kozhikode", 11.2588, 75.7804),
-    "7510": ("Kerala Circle", "Kochi / Kannur", 11.8745, 75.3704),
-    "7558": ("Kerala Circle", "Kochi / Thiruvananthapuram", 8.5241, 76.9366),
-    "7559": ("Kerala Circle", "Kochi / Kozhikode", 11.2588, 75.7804),
-    "7560": ("Kerala Circle", "Kochi / Kottayam", 9.5916, 76.5222),
-    "7561": ("Kerala Circle", "Kochi / Palakkad", 10.7867, 76.6548),
-    "7591": ("Kerala Circle", "Kochi / Thiruvananthapuram", 8.5241, 76.9366),
-    "7592": ("Kerala Circle", "Kochi / Thrissur", 10.5276, 76.2144),
-    "7593": ("Kerala Circle", "Kochi / Malappuram", 11.0732, 76.0740),
-    "7594": ("Kerala Circle", "Kochi / Kozhikode", 11.2588, 75.7804),
-    "7736": ("Kerala Circle", "Kochi / Thiruvananthapuram", 8.5241, 76.9366),
-    "7902": ("Kerala Circle", "Kochi / Thiruvananthapuram", 8.5241, 76.9366),
-    "7907": ("Kerala Circle", "Kochi / Thrissur", 10.5276, 76.2144),
-    "7909": ("Kerala Circle", "Kochi / Kozhikode", 11.2588, 75.7804),
-    "7994": ("Kerala Circle", "Kochi / Thiruvananthapuram", 8.5241, 76.9366),
+    # --- KERALA CIRCLE (14 Revenue Districts & 11 Telecom SSAs) ---
+    # Ernakulam / Kochi Metro & Central (Lat: 9.9816, Lon: 76.2999)
+    "9846": ("Kerala Circle", "Ernakulam / Kochi", 9.9816, 76.2999, "Bharti Airtel"),
+    "9446": ("Kerala Circle", "Ernakulam Central", 9.9816, 76.2999, "BSNL Mobile"),
+    "9400": ("Kerala Circle", "Ernakulam / Aluva", 10.1076, 76.3516, "BSNL Mobile"),
+    "9562": ("Kerala Circle", "Ernakulam / Kochi Metro", 9.9816, 76.2999, "Bharti Airtel"),
+    "8086": ("Kerala Circle", "Ernakulam / Kochi", 9.9816, 76.2999, "Bharti Airtel"),
+    "8129": ("Kerala Circle", "Ernakulam / Kakkanad InfoPark", 10.0159, 76.3419, "Bharti Airtel"),
+    "8547": ("Kerala Circle", "Ernakulam Central", 9.9816, 76.2999, "BSNL Mobile"),
+    "7012": ("Kerala Circle", "Ernakulam / Kochi", 9.9816, 76.2999, "Reliance Jio"),
+    "7306": ("Kerala Circle", "Ernakulam / Kochi", 9.9816, 76.2999, "Reliance Jio"),
+    "9744": ("Kerala Circle", "Ernakulam / Muvattupuzha", 9.9845, 76.5786, "Vodafone Idea (Vi)"),
+    "9605": ("Kerala Circle", "Ernakulam / Angamaly", 10.1960, 76.3860, "Bharti Airtel"),
+
+    # Kozhikode / Calicut (Lat: 11.2588, Lon: 75.7804)
+    "9895": ("Kerala Circle", "Kozhikode (Calicut)", 11.2588, 75.7804, "Bharti Airtel"),
+    "9495": ("Kerala Circle", "Kozhikode Central", 11.2588, 75.7804, "BSNL Mobile"),
+    "8078": ("Kerala Circle", "Kozhikode / Vadakara", 11.6022, 75.5916, "Vodafone Idea (Vi)"),
+    "8111": ("Kerala Circle", "Kozhikode (Calicut)", 11.2588, 75.7804, "Vodafone Idea (Vi)"),
+    "8156": ("Kerala Circle", "Kozhikode / Koyilandy", 11.4428, 75.6983, "Bharti Airtel"),
+    "8589": ("Kerala Circle", "Kozhikode (Calicut)", 11.2588, 75.7804, "Vodafone Idea (Vi)"),
+    "8891": ("Kerala Circle", "Kozhikode (Calicut)", 11.2588, 75.7804, "Vodafone Idea (Vi)"),
+    "7025": ("Kerala Circle", "Kozhikode (Calicut)", 11.2588, 75.7804, "Reliance Jio"),
+    "7356": ("Kerala Circle", "Kozhikode (Calicut)", 11.2588, 75.7804, "Reliance Jio"),
+    "7559": ("Kerala Circle", "Kozhikode / Ramanattukara", 11.1788, 75.8647, "Reliance Jio"),
+    "7594": ("Kerala Circle", "Kozhikode (Calicut)", 11.2588, 75.7804, "Reliance Jio"),
+    "7909": ("Kerala Circle", "Kozhikode (Calicut)", 11.2588, 75.7804, "Vodafone Idea (Vi)"),
+    "9539": ("Kerala Circle", "Kozhikode / Feroke", 11.1724, 75.8368, "Vodafone Idea (Vi)"),
+    "9747": ("Kerala Circle", "Kozhikode (Calicut)", 11.2588, 75.7804, "Vodafone Idea (Vi)"),
+
+    # Thiruvananthapuram / Trivandrum (Lat: 8.5241, Lon: 76.9366)
+    "9847": ("Kerala Circle", "Thiruvananthapuram Central", 8.5241, 76.9366, "Vodafone Idea (Vi)"),
+    "9447": ("Kerala Circle", "Thiruvananthapuram Central", 8.5241, 76.9366, "BSNL Mobile"),
+    "9496": ("Kerala Circle", "Thiruvananthapuram / Secretariat", 8.5241, 76.9366, "BSNL Mobile"),
+    "8075": ("Kerala Circle", "Thiruvananthapuram / Neyyattinkara", 8.4035, 77.0858, "Reliance Jio"),
+    "8089": ("Kerala Circle", "Thiruvananthapuram / Attingal", 8.6948, 76.8141, "Vodafone Idea (Vi)"),
+    "8138": ("Kerala Circle", "Thiruvananthapuram", 8.5241, 76.9366, "Vodafone Idea (Vi)"),
+    "8281": ("Kerala Circle", "Thiruvananthapuram", 8.5241, 76.9366, "BSNL Mobile"),
+    "8590": ("Kerala Circle", "Thiruvananthapuram / Technopark", 8.5581, 76.8808, "Vodafone Idea (Vi)"),
+    "8606": ("Kerala Circle", "Thiruvananthapuram", 8.5241, 76.9366, "Vodafone Idea (Vi)"),
+    "8848": ("Kerala Circle", "Thiruvananthapuram", 8.5241, 76.9366, "Reliance Jio"),
+    "8893": ("Kerala Circle", "Thiruvananthapuram", 8.5241, 76.9366, "Bharti Airtel"),
+    "8921": ("Kerala Circle", "Thiruvananthapuram", 8.5241, 76.9366, "Reliance Jio"),
+    "7558": ("Kerala Circle", "Thiruvananthapuram", 8.5241, 76.9366, "Reliance Jio"),
+    "7591": ("Kerala Circle", "Thiruvananthapuram", 8.5241, 76.9366, "Reliance Jio"),
+    "7736": ("Kerala Circle", "Thiruvananthapuram", 8.5241, 76.9366, "Bharti Airtel"),
+    "7902": ("Kerala Circle", "Thiruvananthapuram", 8.5241, 76.9366, "Vodafone Idea (Vi)"),
+    "7994": ("Kerala Circle", "Thiruvananthapuram", 8.5241, 76.9366, "Vodafone Idea (Vi)"),
+    "9746": ("Kerala Circle", "Thiruvananthapuram / Nedumangad", 8.6044, 76.9984, "Vodafone Idea (Vi)"),
+
+    # Thrissur (Lat: 10.5276, Lon: 76.2144)
+    "9947": ("Kerala Circle", "Thrissur (Cultural Capital)", 10.5276, 76.2144, "Vodafone Idea (Vi)"),
+    "9633": ("Kerala Circle", "Thrissur / Guruvayur", 10.5946, 76.0407, "Bharti Airtel"),
+    "9497": ("Kerala Circle", "Thrissur Central", 10.5276, 76.2144, "BSNL Mobile"),
+    "8113": ("Kerala Circle", "Thrissur / Chalakudy", 10.3070, 76.3330, "Vodafone Idea (Vi)"),
+    "8592": ("Kerala Circle", "Thrissur / Kunnamkulam", 10.6489, 76.0694, "Vodafone Idea (Vi)"),
+    "7034": ("Kerala Circle", "Thrissur", 10.5276, 76.2144, "Reliance Jio"),
+    "7592": ("Kerala Circle", "Thrissur / Irinjalakuda", 10.3444, 76.2057, "Reliance Jio"),
+    "7907": ("Kerala Circle", "Thrissur", 10.5276, 76.2144, "Vodafone Idea (Vi)"),
+
+    # Kannur (Lat: 11.8745, Lon: 75.3704)
+    "9745": ("Kerala Circle", "Kannur (Cannanore)", 11.8745, 75.3704, "Bharti Airtel"),
+    "8136": ("Kerala Circle", "Kannur / Thalassery", 11.7491, 75.4890, "Vodafone Idea (Vi)"),
+    "8593": ("Kerala Circle", "Kannur / Payyanur", 12.1009, 75.2017, "Vodafone Idea (Vi)"),
+    "7510": ("Kerala Circle", "Kannur", 11.8745, 75.3704, "Reliance Jio"),
+
+    # Kollam (Lat: 8.8932, Lon: 76.6141)
+    "9567": ("Kerala Circle", "Kollam (Quilon)", 8.8932, 76.6141, "Bharti Airtel"),
+    "9995": ("Kerala Circle", "Kollam / Karunagappalli", 9.0558, 76.5366, "Vodafone Idea (Vi)"),
+
+    # Kottayam (Lat: 9.5916, Lon: 76.5222)
+    "9961": ("Kerala Circle", "Kottayam", 9.5916, 76.5222, "Vodafone Idea (Vi)"),
+    "8139": ("Kerala Circle", "Kottayam / Changanassery", 9.4447, 76.5381, "Vodafone Idea (Vi)"),
+    "7560": ("Kerala Circle", "Kottayam", 9.5916, 76.5222, "Reliance Jio"),
+
+    # Malappuram (Lat: 11.0732, Lon: 76.0740)
+    "9645": ("Kerala Circle", "Malappuram / Manjeri", 11.1187, 76.1218, "Vodafone Idea (Vi)"),
+    "8137": ("Kerala Circle", "Malappuram / Tirur", 10.9161, 75.9238, "Vodafone Idea (Vi)"),
+    "8943": ("Kerala Circle", "Malappuram / Perinthalmanna", 10.9760, 76.2254, "Vodafone Idea (Vi)"),
+    "7593": ("Kerala Circle", "Malappuram", 11.0732, 76.0740, "Reliance Jio"),
+
+    # Palakkad (Lat: 10.7867, Lon: 76.6548)
+    "9656": ("Kerala Circle", "Palakkad (Palghat)", 10.7867, 76.6548, "Vodafone Idea (Vi)"),
+    "8157": ("Kerala Circle", "Palakkad / Ottapalam", 10.7719, 76.3768, "Vodafone Idea (Vi)"),
+    "7561": ("Kerala Circle", "Palakkad", 10.7867, 76.6548, "Reliance Jio"),
+
+    # Alappuzha (Lat: 9.4981, Lon: 76.3388)
+    "9544": ("Kerala Circle", "Alappuzha (Alleppey)", 9.4981, 76.3388, "Vodafone Idea (Vi)"),
+    "8289": ("Kerala Circle", "Alappuzha / Cherthala", 9.6848, 76.3347, "Vodafone Idea (Vi)"),
+
+    # Pathanamthitta (Lat: 9.2648, Lon: 76.7870)
+    "9526": ("Kerala Circle", "Pathanamthitta / Adoor", 9.1530, 76.7356, "Vodafone Idea (Vi)"),
+    "9946": ("Kerala Circle", "Pathanamthitta / Thiruvalla", 9.3835, 76.5741, "Bharti Airtel"),
 
     # --- KARNATAKA CIRCLE (Bengaluru / Mysuru / Hubballi) ---
     "9844": ("Karnataka Circle", "Bengaluru / Mysuru", 12.9716, 77.5946),
@@ -638,6 +659,7 @@ class PhoneAnalyzerModule(BaseOSINTModule):
         # Regional Telecom Circle / Granular Routing Resolution
         circle_name: Optional[str] = None
         circle_city: Optional[str] = None
+        operator_name: Optional[str] = None
         routing_notes: str = ""
 
         # --- 1. INDIA (+91) GRANULAR RESOLUTION ---
@@ -652,7 +674,11 @@ class PhoneAnalyzerModule(BaseOSINTModule):
                     circle_city = circle_info[1]
                     lat = circle_info[2]
                     lon = circle_info[3]
-                    routing_notes = f"DoT Telecom Circle: {circle_name} ({circle_city}) [Mobile Series: {pfx4}]"
+                    if len(circle_info) >= 5:
+                        operator_name = circle_info[4]
+                    else:
+                        operator_name = "Unified Cellular Access"
+                    routing_notes = f"DoT Telecom Circle: {circle_name} ({circle_city}) [Carrier: {operator_name} | Series: {pfx4}]"
                 else:
                     # Fallback to 2-digit general prefix
                     routing_notes = f"Indian National Mobile Series: {national_number[:2]}xx-xxxxx (DoT Unified Telecom Access)"
@@ -666,6 +692,7 @@ class PhoneAnalyzerModule(BaseOSINTModule):
                         circle_city = std_info[1]
                         lat = std_info[2]
                         lon = std_info[3]
+                        operator_name = "BSNL Fixed-Line PSTN"
                         routing_notes = f"DoT Fixed-Line STD Area: {circle_city}, {circle_name} [Code: 0{std_cand}]"
                         break
 
@@ -679,6 +706,7 @@ class PhoneAnalyzerModule(BaseOSINTModule):
                     circle_city = nanp_info[1]
                     lat = nanp_info[2]
                     lon = nanp_info[3]
+                    operator_name = "North American Numbering Plan"
                     routing_notes = f"NANP Area Code: {area_code} ({circle_city}, {circle_name})"
 
         # --- 3. UK (+44) GRANULAR RESOLUTION ---
@@ -692,6 +720,7 @@ class PhoneAnalyzerModule(BaseOSINTModule):
                     circle_city = uk_info[1]
                     lat = uk_info[2]
                     lon = uk_info[3]
+                    operator_name = "Ofcom UK Carrier"
                     routing_notes = f"Ofcom UK Regional Area: {circle_city}, {circle_name} [0{uk_cand}]"
                     break
 
@@ -701,15 +730,27 @@ class PhoneAnalyzerModule(BaseOSINTModule):
         finding.primary_entity = finding.add_entity("PHONE", e164_format, confidence=0.98, provenance="OBSERVED")
 
         # Location Entity with exact coordinates for OpenStreetMap
-        location_display = f"{circle_name}, {matched_country}" if circle_name else matched_country
+        location_display = (
+            f"{circle_city}, {circle_name}, {matched_country}"
+            if (circle_city and circle_name)
+            else (f"{circle_name}, {matched_country}" if circle_name else matched_country)
+        )
+        map_embed = (
+            f"https://www.openstreetmap.org/export/embed.html?bbox={lon-0.08:.4f}%2C{lat-0.06:.4f}%2C{lon+0.08:.4f}%2C{lat+0.06:.4f}&layer=mapnik&marker={lat:.4f}%2C{lon:.4f}"
+            if (lat and lon)
+            else None
+        )
         loc_meta = {
             "country": matched_country,
             "state_circle": circle_name or matched_country,
+            "district_ssa": circle_city or iso_code,
             "city": circle_city or iso_code,
+            "operator": operator_name or "National Telephony",
             "latitude": lat,
             "longitude": lon,
             "timezone": tz_offset,
             "routing": routing_notes or f"ITU-T Standard National Allocation ({iso_code})",
+            "map_embed_url": map_embed,
         }
         finding.add_entity(
             "LOCATION",
@@ -718,6 +759,15 @@ class PhoneAnalyzerModule(BaseOSINTModule):
             provenance="CORROBORATED" if circle_name else "OBSERVED",
             metadata=loc_meta
         )
+
+        if operator_name and operator_name not in ("Unified Cellular Access", "National Telephony"):
+            finding.add_entity(
+                "ORGANIZATION",
+                f"{operator_name} ({circle_name or matched_country})",
+                confidence=0.92,
+                provenance="OBSERVED",
+                metadata={"role": "telecom_carrier", "circle": circle_name, "district": circle_city}
+            )
 
         # Public Presences and Directories for Ledger
         phone_sites = [
