@@ -76,7 +76,7 @@ def test_normalization():
     """Test canonicalization and hash computation."""
     assert canonicalize_value("DOMAIN", "  EXAMPLE.COM  ") == "example.com"
     assert canonicalize_value("EMAIL", "User@Domain.COM") == "user@domain.com"
-    assert canonicalize_value("USERNAME", "@rohan") == "rohan"
+    assert canonicalize_value("USERNAME", "@johndoe") == "johndoe"
 
     h1 = compute_evidence_hash("DNS", "snippet a", {"ip": "1.1.1.1"})
     h2 = compute_evidence_hash("DNS", "snippet a", {"ip": "1.1.1.1"})

@@ -25,7 +25,7 @@ class ParseRequest(BaseModel):
 
 
 class ParsedTarget(BaseModel):
-    value: str           # The extracted value (e.g. "+919846123456")
+    value: str           # The extracted value (e.g. "+12025550143")
     type: str            # PHONE | EMAIL | USERNAME | DOMAIN | IP | PERSON | LOCATION | ORGANIZATION | URL
     label: str           # Human label (e.g. "Phone Number")
     confidence: float    # 0.0 – 1.0
@@ -105,20 +105,20 @@ Your task:
 4. Return ONLY valid JSON — an array of objects with keys: value, type, label, confidence (0.0-1.0), context.
 
 Rules:
-- Normalize phone numbers to E.164 format if the country is clear (e.g. "9846 123456" from India → "+919846123456")
+- Normalize phone numbers to E.164 format if the country is clear (e.g. "020 7946 0958" from UK → "+442079460958")
 - For person names, include the full name as given.
 - For locations (city, state, country), extract them separately.
 - confidence: 0.97 for exact matches (email/phone/URL), 0.85 for inferred/partial.
 - DO NOT include generic words — only concrete identifiers.
 
-Example input: "his name is Rohan Nair, lives in Thiruvananthapuram Kerala, phone 9847 556677, uses handle r0han99 on insta, email rohan@gmail.com"
+Example input: "target user John Doe, lives in Dublin Ireland, phone +353 1 496 0123, uses handle jdoe99 on twitter, email jdoe@example.org"
 Example output:
 [
-  {"value": "Rohan Nair", "type": "PERSON", "label": "Full Name", "confidence": 0.95, "context": "name extracted from sentence"},
-  {"value": "Thiruvananthapuram, Kerala, India", "type": "LOCATION", "label": "City / State", "confidence": 0.90, "context": "location context from 'lives in'"},
-  {"value": "+919847556677", "type": "PHONE", "label": "Phone Number", "confidence": 0.95, "context": "phone number normalized to E.164"},
-  {"value": "r0han99", "type": "USERNAME", "label": "Instagram Handle", "confidence": 0.92, "context": "handle from 'insta'"},
-  {"value": "rohan@gmail.com", "type": "EMAIL", "label": "Email Address", "confidence": 0.97, "context": "email pattern detected"}
+  {"value": "John Doe", "type": "PERSON", "label": "Full Name", "confidence": 0.95, "context": "name extracted from sentence"},
+  {"value": "Dublin, Ireland", "type": "LOCATION", "label": "City / Country", "confidence": 0.90, "context": "location context from 'lives in'"},
+  {"value": "+35314960123", "type": "PHONE", "label": "Phone Number", "confidence": 0.95, "context": "phone number normalized to E.164"},
+  {"value": "jdoe99", "type": "USERNAME", "label": "Twitter Handle", "confidence": 0.92, "context": "handle from 'twitter'"},
+  {"value": "jdoe@example.org", "type": "EMAIL", "label": "Email Address", "confidence": 0.97, "context": "email pattern detected"}
 ]
 
 Now extract from this input:

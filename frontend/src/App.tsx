@@ -433,7 +433,7 @@ export const App: React.FC = () => {
               Universal Target Investigation
             </h1>
             <p className="text-slate-400 text-xs font-mono mt-1">
-              Enter a name, username, email, phone, domain, IP — or just <span className="text-amber-400 font-bold">type a sentence</span> like <span className="italic text-slate-300">"his name is Rohan, lives in Kochi, phone 98461 23456, email r@gmail.com"</span> and AI will extract everything.
+              Enter any target — username, domain, email, phone, IP, or type a multi-target query to extract all intelligence.
             </p>
           </div>
 
@@ -503,10 +503,9 @@ export const App: React.FC = () => {
             <span className="text-slate-400 font-mono">Quick Targets:</span>
             {[
               { label: "apex-defense.org", type: "Domain" },
-              { label: "johnsmith", type: "Username" },
-              { label: "rohan123", type: "Handle" },
-              { label: "someone@example.com", type: "Email" },
-              { label: "+91 98765 43210", type: "Phone" },
+              { label: "johndoe", type: "Username" },
+              { label: "target_user", type: "Handle" },
+              { label: "contact@domain.org", type: "Email" },
               { label: "8.8.8.8", type: "IP" },
               { label: "github.com/torvalds/linux", type: "Repo" },
             ].map((ex) => (

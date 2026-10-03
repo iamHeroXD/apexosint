@@ -374,9 +374,9 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                 {(investigations.length > 0 ? investigations.slice(0, 5) : [
                   { id: "1", title: "Example Corporation", type: "Domain", target: "example.com", status: "Running", time: "12 min ago" },
                   { id: "2", title: "John Smith", type: "Name", target: "John Smith", status: "Completed", time: "2 hours ago" },
-                  { id: "3", title: "Rohan123", type: "Username", target: "Rohan123", status: "Completed", time: "5 hours ago" },
+                  { id: "3", title: "dev_user", type: "Username", target: "dev_user", status: "Completed", time: "5 hours ago" },
                   { id: "4", title: "8.8.8.8", type: "IP Address", target: "8.8.8.8", status: "Completed", time: "1 day ago" },
-                  { id: "5", title: "GitHub Repository", type: "Repository", target: "github.com/iamHeroXD/rcn-prime", status: "Completed", time: "1 day ago" },
+                  { id: "5", title: "GitHub Repository", type: "Repository", target: "github.com/torvalds/linux", status: "Completed", time: "1 day ago" },
                 ]).map((inv: any, idx: number) => {
                   const isRunning = inv.status === "running" || inv.status === "Running";
                   return (

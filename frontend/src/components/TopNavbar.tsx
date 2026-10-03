@@ -81,10 +81,10 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           className="flex items-center space-x-2 pl-2 border-l border-[#151c2c] cursor-pointer hover:opacity-85 transition-opacity"
         >
           <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center font-bold font-mono text-xs text-slate-200">
-            R
+            A
           </div>
           <span className="text-xs font-mono font-semibold text-slate-200 hidden sm:inline">
-            Rohan
+            Analyst
           </span>
           <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
         </div>
