@@ -68,6 +68,10 @@ export const App: React.FC = () => {
   const [siteFilter, setSiteFilter] = useState<"found" | "all" | "dormant">("found");
   const [siteSearch, setSiteSearch] = useState("");
   const [mapExpanded, setMapExpanded] = useState(false);
+  // NL Parse state
+  const [parsedTargets, setParsedTargets] = useState<Array<{value: string; type: string; label: string; confidence: number; context: string}>>([]);
+  const [isParsing, setIsParsing] = useState(false);
+  const [showParsePreview, setShowParsePreview] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
@@ -124,10 +128,33 @@ export const App: React.FC = () => {
 
   const detected = detectTargetType(query);
 
-  // Run Investigation
-  const handleStartScan = async (targetQuery?: string) => {
+  // Run Investigation (with optional NL parsing)
+  const handleStartScan = async (targetQuery?: string, skipParse = false) => {
     const q = (targetQuery || query).trim();
     if (!q || isScanning) return;
+
+    // Step 1: NL Parse if input looks like natural language and we haven't already parsed
+    if (!skipParse) {
+      setIsParsing(true);
+      setShowParsePreview(false);
+      setParsedTargets([]);
+      try {
+        const parseResult = await api.parseQuery(q);
+        if (parseResult.is_natural_language && parseResult.parsed_targets.length > 0) {
+          setParsedTargets(parseResult.parsed_targets);
+          setShowParsePreview(true);
+          setIsParsing(false);
+          // Auto-launch with the multi_target_query after short delay for UX
+          setTimeout(() => {
+            handleStartScan(parseResult.multi_target_query, true);
+          }, 1200);
+          return;
+        }
+      } catch (err) {
+        console.warn("NL parse failed, proceeding directly:", err);
+      }
+      setIsParsing(false);
+    }
 
     setIsScanning(true);
     setDossier(null);
@@ -343,7 +370,7 @@ export const App: React.FC = () => {
               Universal Target Investigation
             </h1>
             <p className="text-slate-400 text-xs font-mono mt-1">
-              Enter any identifier — name, username, email, phone, domain, IP, URL, or company.
+              Enter a name, username, email, phone, domain, IP — or just <span className="text-amber-400 font-bold">type a sentence</span> like <span className="italic text-slate-300">"his name is Rohan, lives in Kochi, phone 98461 23456, email r@gmail.com"</span> and AI will extract everything.
             </p>
           </div>
 
@@ -362,7 +389,7 @@ export const App: React.FC = () => {
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Enter anything to investigate..."
+                  placeholder="Enter anything — or type a full sentence with name, phone, email..."
                   autoComplete="off"
                   spellCheck={false}
                   className="w-full bg-[#0b101c] border border-[#212e4d] focus:border-blue-500 rounded-xl pl-11 pr-4 py-3 text-sm text-white placeholder-slate-500 font-mono outline-none transition-colors"
@@ -370,10 +397,15 @@ export const App: React.FC = () => {
               </div>
               <button
                 type="submit"
-                disabled={isScanning || !query.trim()}
+                disabled={isScanning || isParsing || !query.trim()}
                 className="px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:bg-blue-900 disabled:cursor-not-allowed text-white font-bold text-sm font-mono flex items-center space-x-2 transition-colors shrink-0 cursor-pointer"
               >
-                {isScanning ? (
+                {isParsing ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span>Parsing...</span>
+                  </>
+                ) : isScanning ? (
                   <RefreshCw className="w-4 h-4 animate-spin" />
                 ) : (
                   <>
@@ -421,6 +453,64 @@ export const App: React.FC = () => {
             ))}
           </div>
         </div>
+
+        {/* NL PARSING SPINNER */}
+        {isParsing && (
+          <div className="bg-[#0e1424] border border-amber-500/30 rounded-2xl p-5 shadow-xl">
+            <div className="flex items-center space-x-3 text-xs font-mono">
+              <RefreshCw className="w-4 h-4 animate-spin text-amber-400" />
+              <span className="text-amber-400 font-bold">AI Entity Extraction in Progress...</span>
+              <span className="text-slate-400">Gemini is reading your input and classifying all targets</span>
+            </div>
+          </div>
+        )}
+
+        {/* NL PARSE PREVIEW CARD */}
+        {showParsePreview && parsedTargets.length > 0 && (
+          <div className="bg-[#0e1424] border border-amber-500/40 rounded-2xl p-5 shadow-xl space-y-3">
+            <div className="flex items-center justify-between border-b border-[#1e2840] pb-3">
+              <div className="flex items-center space-x-2">
+                <Sparkles className="w-4 h-4 text-amber-400" />
+                <span className="text-sm font-bold font-mono text-white uppercase tracking-wider">
+                  AI Extracted {parsedTargets.length} Intelligence Targets
+                </span>
+              </div>
+              <span className="text-[10px] font-mono text-amber-400 border border-amber-500/30 px-2 py-1 rounded-lg">
+                AUTO-LAUNCHING INVESTIGATION...
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {parsedTargets.map((t, i) => {
+                const typeColors: Record<string, string> = {
+                  PHONE: "text-sky-400 bg-sky-500/10 border-sky-500/30",
+                  EMAIL: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
+                  USERNAME: "text-blue-400 bg-blue-500/10 border-blue-500/30",
+                  PERSON: "text-indigo-400 bg-indigo-500/10 border-indigo-500/30",
+                  LOCATION: "text-green-400 bg-green-500/10 border-green-500/30",
+                  DOMAIN: "text-cyan-400 bg-cyan-500/10 border-cyan-500/30",
+                  IP: "text-amber-400 bg-amber-500/10 border-amber-500/30",
+                  URL: "text-purple-400 bg-purple-500/10 border-purple-500/30",
+                  ORGANIZATION: "text-orange-400 bg-orange-500/10 border-orange-500/30",
+                  GITHUB_REPO: "text-violet-400 bg-violet-500/10 border-violet-500/30",
+                  CRYPTO_ADDRESS: "text-yellow-400 bg-yellow-500/10 border-yellow-500/30",
+                };
+                const colorClass = typeColors[t.type] || "text-slate-400 bg-slate-500/10 border-slate-500/30";
+                return (
+                  <div key={i} className={`flex items-start space-x-2.5 p-3 rounded-xl border text-xs font-mono ${colorClass}`}>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <span className="font-bold uppercase text-[10px] opacity-80">{t.label}</span>
+                        <span className="text-[9px] opacity-60">{Math.round(t.confidence * 100)}% conf</span>
+                      </div>
+                      <div className="font-bold truncate">{t.value}</div>
+                      <div className="text-[10px] opacity-60 mt-0.5">{t.context}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* SCAN PROGRESS TELEMETRY BAR */}
         {isScanning && (

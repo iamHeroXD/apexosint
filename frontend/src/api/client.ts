@@ -105,4 +105,20 @@ export const api = {
   getSettings: () => request<any>("/settings"),
   updateSettings: (data: any) => request<any>("/settings", { method: "POST", body: JSON.stringify(data) }),
   runDoctor: () => request<{ all_passed: boolean; checks: any[] }>("/settings/doctor"),
+
+  // Natural Language Query Parser
+  parseQuery: (text: string) =>
+    request<{
+      original_text: string;
+      parsed_targets: Array<{
+        value: string;
+        type: string;
+        label: string;
+        confidence: number;
+        context: string;
+      }>;
+      multi_target_query: string;
+      is_natural_language: boolean;
+    }>("/parse-query", { method: "POST", body: JSON.stringify({ text }) }),
 };
+

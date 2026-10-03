@@ -17,6 +17,7 @@ from app.api.v1.modules import router as modules_router
 from app.api.v1.reports import router as reports_router
 from app.api.v1.demo import router as demo_router
 from app.api.v1.settings import router as settings_router
+from app.api.v1.parse import router as parse_router
 from app.modules.registry import module_registry
 
 # Configure logging
@@ -93,6 +94,7 @@ app.include_router(modules_router, prefix="/api")
 app.include_router(reports_router, prefix="/api")
 app.include_router(demo_router, prefix="/api")
 app.include_router(settings_router, prefix="/api")
+app.include_router(parse_router, prefix="/api")
 
 # Serve production frontend if built
 import os
