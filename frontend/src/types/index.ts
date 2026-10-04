@@ -39,6 +39,9 @@ export interface Investigation {
     sources_count: number;
     high_confidence_count: number;
     contradictions_count: number;
+    clusters_count?: number;
+    identity_hypotheses?: any[];
+    timeline_metrics?: any;
     executive_summary?: string;
   };
   created_at: string;
@@ -51,7 +54,7 @@ export interface Entity {
   normalized_value: string;
   cluster_id?: string;
   confidence: number;
-  provenance_label: "OBSERVED" | "CORROBORATED" | "AI_INFERENCE" | "UNVERIFIED";
+  provenance_label: "OBSERVED" | "CORROBORATED" | "AI_INFERENCE" | "UNVERIFIED" | "CONFLICTED";
   is_bookmarked: boolean;
   first_seen: string;
   metadata_json?: Record<string, any>;
@@ -64,11 +67,16 @@ export interface Evidence {
   source_url?: string;
   collection_method: string;
   confidence: number;
-  epistemic_label: "OBSERVED" | "CORROBORATED" | "AI_INFERENCE" | "UNVERIFIED";
+  source_reliability?: number;
+  epistemic_label: "OBSERVED" | "CORROBORATED" | "CONFLICTED" | "INFERRED" | "UNVERIFIED" | "STALE";
+  corroboration_count?: number;
+  independent_source_count?: number;
   snippet: string;
   raw_payload_json?: Record<string, any>;
   related_entity_ids_json?: string[];
   collected_at: string;
+  first_seen?: string;
+  last_seen?: string;
   is_bookmarked: boolean;
 }
 
@@ -78,6 +86,9 @@ export interface Relationship {
   target_entity_id: string;
   relation_type: string;
   confidence: number;
+  discovery_method?: string;
+  explanation?: string;
+  discovered_at?: string;
   is_ai_inferred: boolean;
   evidence_ids_json?: string[];
 }

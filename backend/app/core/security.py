@@ -80,8 +80,16 @@ def validate_target_url(url: str) -> Tuple[bool, Optional[str]]:
         if any(ip in net for net in BLOCKED_NETWORKS):
             return False, f"Direct access to private IP '{hostname}' is blocked."
     except ValueError:
-        # Hostname is a domain name, proceed safely
-        pass
+        # Hostname is a domain name: verify it doesn't resolve to private ranges (DNS Rebinding Guard)
+        try:
+            addrs = socket.getaddrinfo(hostname, None, proto=socket.IPPROTO_TCP)
+            for family, _, _, _, sockaddr in addrs:
+                resolved_ip = sockaddr[0]
+                if is_ip_blocked(resolved_ip):
+                    return False, f"Hostname '{hostname}' resolves to restricted IP '{resolved_ip}' (DNS Rebinding Guard)."
+        except (socket.gaierror, socket.herror):
+            # Domain resolution might fail during offline or unresolvable test cases; allow syntax pass
+            pass
 
     return True, None
 

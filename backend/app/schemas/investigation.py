@@ -82,11 +82,17 @@ class EvidenceOut(BaseModel):
     source_url: Optional[str]
     collection_method: str
     confidence: float
+    source_reliability: float = 0.90
     epistemic_label: str
+    corroboration_count: int = 0
+    independent_source_count: int = 1
+    module_version: str = "1.0.0"
     snippet: str
     raw_payload_json: Optional[Dict[str, Any]]
     related_entity_ids_json: Optional[List[str]]
     collected_at: datetime
+    first_seen: Optional[datetime] = None
+    last_seen: Optional[datetime] = None
     is_bookmarked: bool
 
 
@@ -96,8 +102,12 @@ class RelationshipOut(BaseModel):
     target_entity_id: str
     relation_type: str
     confidence: float
+    discovery_method: str = "DIRECT_CORRELATION"
+    explanation: Optional[str] = None
+    discovered_at: Optional[datetime] = None
     is_ai_inferred: bool
     evidence_ids_json: Optional[List[str]]
+    metadata_json: Optional[Dict[str, Any]] = None
 
 
 class TimelineEventOut(BaseModel):

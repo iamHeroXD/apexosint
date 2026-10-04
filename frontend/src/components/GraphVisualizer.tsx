@@ -37,6 +37,7 @@ export const GraphVisualizer: React.FC<GraphVisualizerProps> = ({
     node_types: [],
   });
   const [selectedNodeData, setSelectedNodeData] = useState<any | null>(null);
+  const [selectedEdgeData, setSelectedEdgeData] = useState<any | null>(null);
 
   const fetchAndRenderGraph = async () => {
     if (!containerRef.current || !investigationId) return;
@@ -135,12 +136,20 @@ export const GraphVisualizer: React.FC<GraphVisualizerProps> = ({
       cy.on("tap", "node", (evt) => {
         const node = evt.target;
         setSelectedNodeData(node.data());
+        setSelectedEdgeData(null);
         onSelectEntityId(node.data("id"));
+      });
+
+      cy.on("tap", "edge", (evt) => {
+        const edge = evt.target;
+        setSelectedEdgeData(edge.data());
+        setSelectedNodeData(null);
       });
 
       cy.on("tap", (evt) => {
         if (evt.target === cy) {
           setSelectedNodeData(null);
+          setSelectedEdgeData(null);
         }
       });
 
@@ -303,6 +312,35 @@ export const GraphVisualizer: React.FC<GraphVisualizerProps> = ({
               >
                 Investigate This →
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* Selected Edge Explanation Overlay */}
+        {selectedEdgeData && (
+          <div className="absolute bottom-4 left-4 z-20 max-w-md w-full bg-[#0f121a]/95 backdrop-blur-md border border-sky-500/30 rounded-xl p-4 shadow-2xl animate-in fade-in slide-in-from-bottom-2 duration-150">
+            <div className="flex items-center justify-between border-b border-[#1f2638] pb-2 mb-2">
+              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-sky-500/10 text-sky-400 border border-sky-500/20">
+                {selectedEdgeData.label}
+              </span>
+              <span className="text-[10px] font-mono text-emerald-400 font-bold">
+                {Math.round(selectedEdgeData.confidence * 100)}% Confidence
+              </span>
+            </div>
+            <div className="space-y-2 mb-3">
+              <div className="text-[11px] font-mono text-slate-400">
+                <span className="text-slate-500">Discovery Method: </span>
+                <span className="text-amber-400 font-semibold">{selectedEdgeData.discovery_method || "DIRECT_CORRELATION"}</span>
+              </div>
+              <p className="font-mono text-xs text-slate-200 bg-[#090b10] p-2.5 rounded-lg border border-[#1f2638]">
+                {selectedEdgeData.explanation || "Deterministic connection established through observed infrastructure telemetry."}
+              </p>
+            </div>
+            <div className="flex items-center justify-between pt-2 border-t border-[#1a2133] text-[10px] font-mono text-slate-500">
+              <span>Backing Evidence: {selectedEdgeData.evidence_count || (selectedEdgeData.evidence_ids ? selectedEdgeData.evidence_ids.length : 0)} source records</span>
+              <span className={selectedEdgeData.is_ai_inferred ? "text-indigo-400" : "text-emerald-400"}>
+                {selectedEdgeData.is_ai_inferred ? "AI INFERRED" : "DETERMINISTIC"}
+              </span>
             </div>
           </div>
         )}

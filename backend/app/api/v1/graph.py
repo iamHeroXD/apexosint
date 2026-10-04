@@ -89,6 +89,9 @@ async def get_cytoscape_graph(
                     "target": rel.target_entity_id,
                     "label": rel.relation_type,
                     "confidence": rel.confidence,
+                    "discovery_method": rel.discovery_method,
+                    "explanation": rel.explanation,
+                    "evidence_ids": rel.evidence_ids_json or [],
                     "is_ai_inferred": rel.is_ai_inferred,
                     "evidence_count": len(rel.evidence_ids_json or []),
                 }

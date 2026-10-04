@@ -24,6 +24,8 @@ from app.engine.normalizer import DataNormalizer
 from app.engine.correlation import DeterministicCorrelator
 from app.engine.contradiction import ContradictionDetector
 from app.engine.entity_resolver import EntityResolver
+from app.engine.source_quality import SourceQualityEngine
+from app.engine.timeline_engine import TimelineEngine
 from app.modules.base import NormalizedFinding
 from app.modules.registry import module_registry
 from app.modules.demo_provider import get_demo_investigation_data
@@ -218,6 +220,10 @@ class InvestigationOrchestrator:
                                 # Persist Evidence records
                                 created_evidence_ids = []
                                 for ev in finding.evidence:
+                                    profile = SourceQualityEngine.get_profile(ev.source_name)
+                                    source_rel = SourceQualityEngine.compute_evidence_reliability(ev.source_name)
+                                    epistemic = SourceQualityEngine.derive_epistemic_label(ev.source_name)
+
                                     db_ev = Evidence(
                                         investigation_id=investigation_id,
                                         source_name=ev.source_name,
@@ -225,7 +231,11 @@ class InvestigationOrchestrator:
                                         source_url=ev.source_url,
                                         collection_method=ev.collection_method,
                                         confidence=ev.confidence,
-                                        epistemic_label=ev.epistemic_label,
+                                        source_reliability=source_rel,
+                                        epistemic_label=epistemic,
+                                        corroboration_count=0,
+                                        independent_source_count=1,
+                                        module_version="1.0.0",
                                         snippet=ev.snippet,
                                         raw_payload_json=ev.raw_payload,
                                         hash_signature=ev.hash_signature,
@@ -395,6 +405,8 @@ class InvestigationOrchestrator:
                         target_entity_id=corr["target_entity_id"],
                         relation_type=corr["relation_type"],
                         confidence=corr["confidence"],
+                        discovery_method=corr.get("discovery_method", "DIRECT_CORRELATION"),
+                        explanation=corr.get("explanation"),
                         is_ai_inferred=corr["is_ai_inferred"],
                         evidence_ids_json=corr["evidence_ids"]
                     )
@@ -425,9 +437,16 @@ class InvestigationOrchestrator:
                     )
                 await session.commit()
 
-                # PHASE: ENTITY RESOLUTION CLUSTERING
-                EntityResolver.resolve_and_cluster(all_entities, all_evs)
+                # PHASE: ENTITY RESOLUTION CLUSTERING & HYPOTHESES
+                resolution_data = EntityResolver.resolve_and_cluster(all_entities, all_evs)
                 await session.commit()
+
+                # PHASE: TEMPORAL INTELLIGENCE ANALYSIS
+                timeline_query = await session.execute(
+                    select(TimelineEvent).where(TimelineEvent.investigation_id == investigation_id)
+                )
+                all_timeline_events = list(timeline_query.scalars().all())
+                timeline_summary = TimelineEngine.generate_timeline_summary(all_timeline_events)
 
                 # Update Investigation Summary
                 inv = await session.get(Investigation, investigation_id)
@@ -440,6 +459,9 @@ class InvestigationOrchestrator:
                         "sources_count": len(set(e.source_name for e in all_evs)),
                         "high_confidence_count": sum(1 for e in all_evs if e.confidence >= 0.9),
                         "contradictions_count": len(conflicts),
+                        "clusters_count": resolution_data.get("total_clusters", 0),
+                        "identity_hypotheses": resolution_data.get("hypotheses", []),
+                        "timeline_metrics": timeline_summary,
                         "executive_summary": f"Investigation complete. Discovered {len(all_entities)} entities across {len(all_evs)} evidence records with {len(correlations)} correlated links and {len(conflicts)} detected contradictions."
                     }
                     await session.commit()

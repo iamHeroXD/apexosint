@@ -165,11 +165,29 @@ async def cmd_scan(query: str, mode: str = "standard", depth: int = 1):
             f"Entities Discovered: [bold cyan]{summary.get('entities_count', 0)}[/bold cyan]\n"
             f"Evidence Records: [bold cyan]{summary.get('evidence_count', 0)}[/bold cyan]\n"
             f"Correlated Links: [bold cyan]{summary.get('relationships_count', 0)}[/bold cyan]\n"
+            f"Disambiguation Clusters: [bold cyan]{summary.get('clusters_count', 0)}[/bold cyan]\n"
             f"Contradictions: [bold red]{summary.get('contradictions_count', 0)}[/bold red]\n\n"
             f"[dim]{summary.get('executive_summary', '')}[/dim]",
             title="Investigation Dossier Summary",
             border_style="green"
         ))
+
+        # Print Identity Hypotheses if discovered
+        hypotheses = summary.get("identity_hypotheses", [])
+        if hypotheses:
+            h_table = Table(title="Resolved Identity Hypotheses (Deterministic)", header_style="bold cyan")
+            h_table.add_column("Canonical Name", style="bold white")
+            h_table.add_column("Confidence", style="yellow")
+            h_table.add_column("Status", style="green")
+            h_table.add_column("Explainable Signals", style="dim")
+            for h in hypotheses:
+                h_table.add_row(
+                    h.get("canonical_name", ""),
+                    h.get("confidence_percentage", ""),
+                    h.get("status", ""),
+                    "; ".join(h.get("explanation", []))
+                )
+            console.print(h_table)
 
 
 def main():

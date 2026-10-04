@@ -54,7 +54,13 @@ export const EvidenceExplorer: React.FC<EvidenceExplorerProps> = ({ investigatio
       case "CORROBORATED":
         return "bg-sky-500/10 text-sky-400 border-sky-500/30";
       case "AI_INFERENCE":
+      case "INFERRED":
         return "bg-purple-500/10 text-purple-400 border-purple-500/30";
+      case "CONFLICTED":
+        return "bg-rose-500/10 text-rose-400 border-rose-500/30";
+      case "STALE":
+        return "bg-slate-500/10 text-slate-400 border-slate-500/30";
+      case "UNVERIFIED":
       default:
         return "bg-amber-500/10 text-amber-400 border-amber-500/30";
     }
@@ -146,7 +152,12 @@ export const EvidenceExplorer: React.FC<EvidenceExplorerProps> = ({ investigatio
 
                 <div className="mt-2 pt-2 border-t border-[#1a2133] flex items-center justify-between text-[11px] font-mono text-slate-500">
                   <span>Method: {ev.collection_method}</span>
-                  <span>Confidence: {Math.round(ev.confidence * 100)}%</span>
+                  <div className="flex items-center space-x-2">
+                    {ev.source_reliability !== undefined && (
+                      <span className="text-sky-400 font-semibold">Rel: {Math.round(ev.source_reliability * 100)}%</span>
+                    )}
+                    <span>Conf: {Math.round(ev.confidence * 100)}%</span>
+                  </div>
                 </div>
               </div>
             ))
@@ -197,7 +208,7 @@ export const EvidenceExplorer: React.FC<EvidenceExplorerProps> = ({ investigatio
             </div>
 
             {/* Provenance Metadata Grid */}
-            <div className="grid grid-cols-2 gap-3 text-xs font-mono">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs font-mono">
               <div className="bg-[#0f121a] border border-[#1f2638] rounded-lg p-3">
                 <span className="text-slate-500 block text-[10px]">SOURCE TYPE</span>
                 <span className="text-slate-200 font-semibold">{selectedEvidence.source_type}</span>
@@ -207,9 +218,21 @@ export const EvidenceExplorer: React.FC<EvidenceExplorerProps> = ({ investigatio
                 <span className="text-slate-200 font-semibold">{selectedEvidence.collection_method}</span>
               </div>
               <div className="bg-[#0f121a] border border-[#1f2638] rounded-lg p-3">
+                <span className="text-slate-500 block text-[10px]">SOURCE RELIABILITY</span>
+                <span className="text-sky-400 font-semibold">
+                  {Math.round((selectedEvidence.source_reliability ?? 0.90) * 100)}%
+                </span>
+              </div>
+              <div className="bg-[#0f121a] border border-[#1f2638] rounded-lg p-3">
                 <span className="text-slate-500 block text-[10px]">CONFIDENCE SCORE</span>
                 <span className="text-emerald-400 font-semibold">
                   {Math.round(selectedEvidence.confidence * 100)}%
+                </span>
+              </div>
+              <div className="bg-[#0f121a] border border-[#1f2638] rounded-lg p-3">
+                <span className="text-slate-500 block text-[10px]">CORROBORATIONS</span>
+                <span className="text-amber-400 font-semibold">
+                  {selectedEvidence.corroboration_count ?? 0} independent sources
                 </span>
               </div>
               <div className="bg-[#0f121a] border border-[#1f2638] rounded-lg p-3">
